@@ -20,20 +20,20 @@ function SearchForm() {
   }
 
   return (
-    <div className="mb-8">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
+    <div>
+      <form onSubmit={handleSubmit} className="relative flex flex-col gap-3 sm:flex-row">
         <label htmlFor="pokemon-search" className="sr-only">Search Pokemon</label>
         <input
           id="pokemon-search"
           type="text"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search by name..."
-          className="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+          placeholder="Search by name or number..."
+          className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-red-500 focus:ring-4 focus:ring-red-100"
         />
         <button
           type="submit"
-          className="rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2"
+          className="rounded-2xl bg-slate-950 px-7 py-4 font-semibold text-white shadow-sm transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2"
         >
           Search
         </button>
