@@ -28,7 +28,7 @@ function DetailPage() {
   const [profile, setProfile] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [isAnimated, setIsAnimated] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
 
   useEffect(() => {
     let isCurrent = true
@@ -65,8 +65,19 @@ function DetailPage() {
   const { pokemon, species, evolution } = profile
   const artwork = pokemon.sprites.other['official-artwork'].front_default ?? pokemon.sprites.front_default
   const animated = pokemon.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default
+  const displaySprite = animated ?? artwork
   const description = getEnglishText(species.flavor_text_entries, 'flavor_text').replace(/\s+/g, ' ')
   const evolutions = flattenEvolutionChain(evolution.chain)
+
+  function speakName() {
+    if (!('speechSynthesis' in window)) return
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(capitalize(pokemon.name))
+    utterance.rate = 0.8
+    utterance.onstart = () => setIsSpeaking(true)
+    utterance.onend = () => setIsSpeaking(false)
+    window.speechSynthesis.speak(utterance)
+  }
 
   return (
     <div className="space-y-8">
@@ -82,9 +93,9 @@ function DetailPage() {
         </div>
         <div className="grid gap-8 p-6 sm:grid-cols-[260px_1fr] sm:p-10">
           <div className="flex flex-col gap-4">
-            <div className="flex min-h-64 items-center justify-center rounded-3xl bg-red-50 p-4"><img className="h-56 w-56 object-contain" src={isAnimated && animated ? animated : artwork} alt={pokemon.name} width="224" height="224" /></div>
-            {animated && <button type="button" onClick={() => setIsAnimated((value) => !value)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-red-300 hover:text-red-700">{isAnimated ? 'Show artwork' : 'Show animated sprite'}</button>}
-            {pokemon.cries?.latest && <audio className="w-full" controls preload="none" src={pokemon.cries.latest} aria-label={`${pokemon.name} cry`} />}
+            <div className="flex min-h-64 items-center justify-center rounded-3xl bg-red-50 p-4"><img className="h-56 w-56 object-contain" src={displaySprite} alt={pokemon.name} width="224" height="224" /></div>
+            <button type="button" onClick={speakName} className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100">{isSpeaking ? 'Speaking...' : 'Listen to name'} <span aria-hidden="true">&#128266;</span></button>
+            <p className="text-center text-xs text-slate-400">Name pronunciation via your browser voice</p>
           </div>
           <div>
             <p className="text-lg leading-8 text-slate-600">{description || 'No English field note is available for this Pokemon yet.'}</p>
