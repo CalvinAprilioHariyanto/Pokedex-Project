@@ -69,14 +69,14 @@ function DetailPage() {
   const description = getEnglishText(species.flavor_text_entries, 'flavor_text').replace(/\s+/g, ' ')
   const evolutions = flattenEvolutionChain(evolution.chain)
 
-  function speakName() {
-    if (!('speechSynthesis' in window)) return
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(capitalize(pokemon.name))
-    utterance.rate = 0.8
-    utterance.onstart = () => setIsSpeaking(true)
-    utterance.onend = () => setIsSpeaking(false)
-    window.speechSynthesis.speak(utterance)
+  function playCry() {
+    const audioUrl = pokemon.cries?.latest || `https://raw.githubusercontent.com/PokeAPI/cries/main/cries/pokemon/latest/${pokemon.id}.ogg`
+    const audio = new Audio(audioUrl)
+    audio.volume = 0.5
+    audio.onplay = () => setIsSpeaking(true)
+    audio.onended = () => setIsSpeaking(false)
+    audio.onerror = () => setIsSpeaking(false)
+    audio.play()
   }
 
   return (
@@ -94,8 +94,8 @@ function DetailPage() {
         <div className="grid gap-8 p-6 sm:grid-cols-[260px_1fr] sm:p-10">
           <div className="flex flex-col gap-4">
             <div className="flex min-h-64 items-center justify-center rounded-3xl bg-red-50 p-4"><img className="h-56 w-56 object-contain" src={displaySprite} alt={pokemon.name} width="224" height="224" /></div>
-            <button type="button" onClick={speakName} className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100">{isSpeaking ? 'Speaking...' : 'Listen to name'} <span aria-hidden="true">&#128266;</span></button>
-            <p className="text-center text-xs text-slate-400">Name pronunciation via your browser voice</p>
+            <button type="button" onClick={playCry} className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100">{isSpeaking ? 'Playing...' : 'Play Cry'} <span aria-hidden="true">&#128266;</span></button>
+            <p className="text-center text-xs text-slate-400">Pokemon cry from PokeAPI</p>
           </div>
           <div>
             <p className="text-lg leading-8 text-slate-600">{description || 'No English field note is available for this Pokemon yet.'}</p>
@@ -119,6 +119,46 @@ function DetailPage() {
           <div className="mt-7 flex flex-wrap items-center gap-3">{evolutions.map((evolutionPokemon, index) => <div key={evolutionPokemon.name} className="flex items-center gap-3"><Link to={`/pokemon/${evolutionPokemon.name}`} className="group text-center"><div className="rounded-2xl bg-slate-100 p-2 transition group-hover:bg-red-50"><img className="h-20 w-20 object-contain" src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${getIdFromUrl(evolutionPokemon.url)}.png`} alt={evolutionPokemon.name} width="80" height="80" /></div><span className="mt-2 block text-sm font-semibold capitalize">{evolutionPokemon.name}</span></Link>{index < evolutions.length - 1 && <span className="text-xl text-red-400">&rarr;</span>}</div>)}</div>
         </section>
       </div>
+
+      {/* Skills / Moves & Other Details */}
+      <section className="rounded-4xl bg-white p-6 shadow-sm sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-700">Combat</p>
+        <h2 className="mt-1 text-2xl font-extrabold">Skills & Additional Details</h2>
+        <div className="mt-6 flex flex-col md:flex-row gap-8">
+          <div className="flex-1">
+            <h3 className="mb-4 text-sm font-bold text-slate-500">Notable Moves (Skills)</h3>
+            <div className="flex flex-wrap gap-2">
+              {pokemon.moves.slice(0, 15).map((moveInfo) => (
+                <span key={moveInfo.move.name} className="rounded-lg bg-slate-100 px-3 py-1.5 text-sm capitalize text-slate-700">
+                  {moveInfo.move.name.replace('-', ' ')}
+                </span>
+              ))}
+              {pokemon.moves.length > 15 && (
+                <span className="rounded-lg bg-slate-50 px-3 py-1.5 text-sm text-slate-400">
+                  + {pokemon.moves.length - 15} more
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex-1 border-t border-slate-100 pt-6 md:border-l md:border-t-0 md:pl-8 md:pt-0">
+            <h3 className="mb-4 text-sm font-bold text-slate-500">Other Information</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between border-b border-slate-50 pb-2">
+                <span className="text-sm text-slate-500">Base Experience</span>
+                <span className="font-semibold text-slate-800">{pokemon.base_experience || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-50 pb-2">
+                <span className="text-sm text-slate-500">Base Happiness</span>
+                <span className="font-semibold text-slate-800">{species.base_happiness || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between border-b border-slate-50 pb-2">
+                <span className="text-sm text-slate-500">Catch Rate</span>
+                <span className="font-semibold text-slate-800">{species.capture_rate || 'N/A'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
