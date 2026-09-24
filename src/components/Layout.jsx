@@ -38,18 +38,6 @@ function Layout() {
             >
               Home
             </NavLink>
-            <NavLink
-              to="/types"
-              className={({ isActive }) =>
-                `rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
-                  isActive
-                    ? 'bg-white/15 text-white'
-                    : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                }`
-              }
-            >
-              Types
-            </NavLink>
           </nav>
         </div>
       </header>
